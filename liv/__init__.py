@@ -1,4 +1,4 @@
-import os 
+import os
 from os.path import expanduser
 import omegaconf
 import hydra
@@ -9,6 +9,7 @@ import copy
 from liv.models.model_liv import LIV
 
 VALID_ARGS = ["_target_", "device", "lr", "hidden_dim", "size", "l2weight", "l1weight", "num_negatives"]
+
 if torch.cuda.is_available():
     device = "cuda"
 else:
@@ -17,7 +18,6 @@ else:
 def cleanup_config(cfg):
     config = copy.deepcopy(cfg)
     config["device"] = device
-
     return config.agent
 
 def load_liv(modelid='resnet50'):
@@ -45,8 +45,10 @@ def load_liv(modelid='resnet50'):
     modelcfg = omegaconf.OmegaConf.load(configpath)
     cleancfg = cleanup_config(modelcfg)
     rep = hydra.utils.instantiate(cleancfg)
-    rep = torch.nn.DataParallel(rep)
+    #rep = torch.nn.DataParallel(rep)
     state_dict = torch.load(modelpath, map_location=torch.device(device))['liv']
-    rep.load_state_dict(state_dict)
-    return rep    
+    # Remove the prefix '.module' as the paras are stored as a DP model
+    new_state_dict = {k.replace("module.", ''): v for k, v in state_dict.items()}
+    rep.load_state_dict(new_state_dict)
+    return rep
 

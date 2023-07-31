@@ -1,5 +1,5 @@
-import clip
-from clip.model import CLIP
+from liv.models.clip import clip
+from liv.models.clip.clip.model import CLIP
 import numpy as np
 from numpy.core.numeric import full
 import torch
@@ -12,6 +12,7 @@ from pathlib import Path
 from torchvision.utils import save_image
 import torchvision.transforms as T
 
+
 class LIV(nn.Module):
     def __init__(self, modelid="RN50", device="cuda",
                        lr=1e-5, weight_decay=0.001,
@@ -22,7 +23,7 @@ class LIV(nn.Module):
 
         self.modelid = modelid
         self.device = device
-        self.visionweight = visionweight 
+        self.visionweight = visionweight
         self.langweight = langweight
         self.clipweight = clipweight
 
@@ -33,14 +34,14 @@ class LIV(nn.Module):
 
         # Load CLIP model and transform
         model, cliptransforms = clip.load(modelid, device=self.device, scratch=scratch, jit=False)
-        
+
         # CLIP precision
         if device == "cpu":
             model.float()
         else :
             clip.model.convert_weights(model)
-        
-        self.model = model 
+
+        self.model = model
         self.model.train()
         self.transforms = cliptransforms
 
@@ -54,7 +55,7 @@ class LIV(nn.Module):
 
         ## Optimizer
         self.encoder_opt = torch.optim.Adam(list(self.model.parameters()),
-        lr=lr, betas=(0.9,0.98),eps=1e-6, weight_decay=weight_decay)      
+        lr=lr, betas=(0.9,0.98),eps=1e-6, weight_decay=weight_decay)
 
     ## Forward Call (im --> representation)
     def forward(self, input, modality="vision", normalize=True):
@@ -94,8 +95,8 @@ class LIV(nn.Module):
         else:
             raise NotImplementedError
         return d
-        
+
     def get_reward(self, e0, es, le, encoded=True):
-        assert encoded == True 
+        assert encoded == True
         return self.sim(es, le)
-    
+
