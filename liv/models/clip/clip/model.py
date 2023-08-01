@@ -134,7 +134,7 @@ class ModifiedResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def forward(self, x):
+    def features_forward(self, x):
         def stem(x):
             x = self.relu1(self.bn1(self.conv1(x)))
             x = self.relu2(self.bn2(self.conv2(x)))
@@ -148,8 +148,12 @@ class ModifiedResNet(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-        x = self.attnpool(x)
+        # [B,2048,7,7]
+        return x
 
+    def forward(self, x):
+        x = self.features_forward(x)
+        x = self.attnpool(x)
         return x
 
 
@@ -367,6 +371,9 @@ class CLIP(nn.Module):
 
         # shape = [global_batch_size, global_batch_size]
         return logits_per_image, logits_per_text
+
+    def features_forward(self, image):
+        return self.visual.features_forward(image)
 
 
 def convert_weights(model: nn.Module):

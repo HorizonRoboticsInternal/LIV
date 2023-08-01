@@ -82,6 +82,11 @@ class LIV(nn.Module):
 
         return features
 
+    def features_forward(self, img):
+        img = self.transforms_tensor(img).to(self.device)
+        # [B,C,H,W]
+        return self.model.features_forward(img)
+
     def sim(self, tensor1, tensor2):
         if type(tensor1) == np.ndarray:
             tensor1 = torch.from_numpy(tensor1).to(self.device)
