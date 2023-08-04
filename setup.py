@@ -12,7 +12,7 @@ def read(fname):
 
 setup(
     name='liv',
-    version='0.1.0',
+    version='0.1.1',
     packages=find_packages(),
     description='LIV: Language-Image Representations and Rewards for Robotic Control',
     long_description=read('README.md'),

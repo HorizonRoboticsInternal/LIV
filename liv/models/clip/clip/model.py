@@ -186,8 +186,13 @@ class ResidualAttentionBlock(nn.Module):
         self.attn_mask = attn_mask
 
     def attention(self, x: torch.Tensor):
-        self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
-        return self.attn(x, x, x, need_weights=False, attn_mask=self.attn_mask)[0]
+        cxt_len = x.shape[0]
+        if self.attn_mask is not None:
+            attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device)
+            attn_mask = attn_mask[:cxt_len, :cxt_len]
+        else:
+            attn_mask = None
+        return self.attn(x, x, x, need_weights=False, attn_mask=attn_mask)[0]
 
     def forward(self, x: torch.Tensor):
         x = x + self.attention(self.ln_1(x))
@@ -344,8 +349,7 @@ class CLIP(nn.Module):
         return self.visual(image.type(self.dtype))
 
     def encode_text(self, text):
-        x = self.token_embedding(text).type(self.dtype)  # [batch_size, n_ctx, d_model]
-        x = x + self.positional_embedding.type(self.dtype)
+        x = self.encode_text_as_embeddings(text)
         x = x.permute(1, 0, 2)  # NLD -> LND
         x = self.transformer(x)
         x = x.permute(1, 0, 2)  # LND -> NLD
@@ -372,8 +376,14 @@ class CLIP(nn.Module):
         # shape = [global_batch_size, global_batch_size]
         return logits_per_image, logits_per_text
 
-    def features_forward(self, image):
+    def encode_image_as_features(self, image):
         return self.visual.features_forward(image)
+
+    def encode_text_as_embeddings(self, text):
+        x = self.token_embedding(text).type(self.dtype)  # [batch_size, n_ctx, d_model]
+        n_ctx = x.shape[1]
+        x = x + self.positional_embedding.type(self.dtype)[:n_ctx, ...]
+        return x
 
 
 def convert_weights(model: nn.Module):

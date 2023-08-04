@@ -82,10 +82,13 @@ class LIV(nn.Module):
 
         return features
 
-    def features_forward(self, img):
+    def encode_image_as_features(self, img):
         img = self.transforms_tensor(img).to(self.device)
         # [B,C,H,W]
-        return self.model.features_forward(img)
+        return self.model.encode_image_as_features(img)
+
+    def encode_text_as_embeddings(self, text):
+        return self.model.encode_text_as_embeddings(text)
 
     def sim(self, tensor1, tensor2):
         if type(tensor1) == np.ndarray:
