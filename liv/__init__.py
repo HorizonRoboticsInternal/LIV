@@ -6,6 +6,7 @@ from huggingface_hub import hf_hub_download
 import gdown
 import torch
 import copy
+import os
 from liv.models.model_liv import LIV
 
 VALID_ARGS = ["_target_", "device", "lr", "hidden_dim", "size", "l2weight", "l1weight", "num_negatives"]
@@ -22,7 +23,13 @@ def cleanup_config(cfg):
 
 def load_liv(modelid='resnet50'):
     assert modelid == 'resnet50'
-    home = os.path.join(expanduser("~"), ".liv")
+
+    model_cache_root = os.getenv('HF_MODEL_CACHE_ROOT', None)
+    if model_cache_root is None:
+        # fallback to user's cache
+        model_cache_root = os.path.join(expanduser("~"), ".cache")
+
+    home = os.path.join(model_cache_root, "liv")
 
     if not os.path.exists(os.path.join(home, modelid)):
         os.makedirs(os.path.join(home, modelid))

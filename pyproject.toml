@@ -1,6 +1,6 @@
 [project]
 name = "LIV-robotics"
-version = "0.1.3"
+version = "0.1.5"
 authors = [
   { name="Jason Ma", email="jasonyma@seas.upenn.edu" },
 ]
