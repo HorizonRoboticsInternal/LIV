@@ -12,7 +12,7 @@ def read(fname):
 
 setup(
     name='liv',
-    version='0.1.1',
+    version='0.1.3',
     packages=find_packages(),
     description='LIV: Language-Image Representations and Rewards for Robotic Control',
     long_description=read('README.md'),
@@ -22,7 +22,7 @@ setup(
         'torchvision>=0.8.2',
         'omegaconf==2.1.1',
         'hydra-core==1.1.1',
-        'pillow==9.0.1',
+        'pillow==9.5.0', # This version is compatible with tensorboard
         'opencv-python',
         'matplotlib',
         'flatten_dict',
